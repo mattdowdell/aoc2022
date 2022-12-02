@@ -1,9 +1,8 @@
-use std::collections::BinaryHeap;
 use std::io::{self, BufRead};
 
 fn main() {
     let stdin = io::stdin();
-    let mut totals = BinaryHeap::new();
+    let mut totals = Vec::new();
     let mut current = 0;
 
     for line in stdin.lock().lines() {
@@ -18,8 +17,8 @@ fn main() {
         }
     }
 
-    println!(
-        "{}",
-        totals.pop().unwrap() + totals.pop().unwrap() + totals.pop().unwrap()
-    );
+    totals.sort();
+    totals.reverse();
+
+    println!("{}", totals.iter().take(3).sum::<u32>());
 }
