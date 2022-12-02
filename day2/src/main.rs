@@ -1,91 +1,11 @@
+//! Solution for [Advent of Code 2022 - Day 2][1].
+//!
+//! [1]: https://adventofcode.com/2022/day/2
+
+mod models;
+
 use std::io::{self, BufRead};
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Shape {
-    Rock,
-    Paper,
-    Scissors,
-}
-
-impl Shape {
-    pub fn outcome(&self, other: Self) -> Outcome {
-        match (self, other) {
-            (Self::Rock, Self::Paper) => Outcome::Lose,
-            (Self::Rock, Self::Scissors) => Outcome::Win,
-            (Self::Rock, Self::Rock) => Outcome::Draw,
-            (Self::Paper, Self::Paper) => Outcome::Draw,
-            (Self::Paper, Self::Scissors) => Outcome::Lose,
-            (Self::Paper, Self::Rock) => Outcome::Win,
-            (Self::Scissors, Self::Paper) => Outcome::Win,
-            (Self::Scissors, Self::Scissors) => Outcome::Draw,
-            (Self::Scissors, Self::Rock) => Outcome::Lose,
-        }
-    }
-
-    pub fn match_outcome(&self, outcome: Outcome) -> Self {
-        match (self, outcome) {
-            (Self::Rock, Outcome::Win) => Self::Paper,
-            (Self::Rock, Outcome::Lose) => Self::Scissors,
-            (Self::Rock, Outcome::Draw) => Self::Rock,
-            (Self::Paper, Outcome::Win) => Self::Scissors,
-            (Self::Paper, Outcome::Lose) => Self::Rock,
-            (Self::Paper, Outcome::Draw) => Self::Paper,
-            (Self::Scissors, Outcome::Win) => Self::Rock,
-            (Self::Scissors, Outcome::Lose) => Self::Paper,
-            (Self::Scissors, Outcome::Draw) => Self::Scissors,
-        }
-    }
-
-    pub fn score(&self) -> u32 {
-        match self {
-            Self::Rock => 1,
-            Self::Paper => 2,
-            Self::Scissors => 3,
-        }
-    }
-}
-
-impl TryFrom<&str> for Shape {
-    type Error = &'static str;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value.trim() {
-            "A" | "X" => Ok(Self::Rock),
-            "B" | "Y" => Ok(Self::Paper),
-            "C" | "Z" => Ok(Self::Scissors),
-            _ => Err("Unsupported value"),
-        }
-    }
-}
-
-enum Outcome {
-    Win,
-    Lose,
-    Draw,
-}
-
-impl Outcome {
-    pub fn score(&self) -> u32 {
-        match self {
-            Self::Win => 6,
-            Self::Draw => 3,
-            Self::Lose => 0,
-        }
-    }
-}
-
-impl TryFrom<&str> for Outcome {
-    type Error = &'static str;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value.trim() {
-            "X" => Ok(Self::Lose),
-            "Y" => Ok(Self::Draw),
-            "Z" => Ok(Self::Win),
-            _ => Err("Unsupported value"),
-        }
-    }
-}
+use models::{Shape, Outcome}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stdin = io::stdin();

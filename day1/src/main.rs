@@ -1,3 +1,8 @@
+//! Solution for [Advent of Code 2022 - Day 1][1].
+//!
+//! [1]: https://adventofcode.com/2022/day/1
+
+use std::cmp::Reverse;
 use std::io::{self, BufRead};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -17,8 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    totals.sort();
-    totals.reverse();
+    totals.sort_by_key(|x| Reverse(*x));
 
     println!(
         "Solution 1: {}",
