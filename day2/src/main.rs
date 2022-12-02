@@ -1,9 +1,5 @@
 use std::io::{self, BufRead};
 
-const OUTCOME_WIN: u32 = 6;
-const OUTCOME_DRAW: u32 = 3;
-const OUTCOME_LOSE: u32 = 0;
-
 #[derive(Clone, Debug, PartialEq)]
 enum Shape {
     Rock,
@@ -12,39 +8,62 @@ enum Shape {
 }
 
 impl Shape {
-    pub fn outcome(&self, other: Self) -> u32 {
-        match (self, other) {
-            (Self::Rock, Self::Paper) => OUTCOME_LOSE,
-            (Self::Rock, Self::Scissors) => OUTCOME_WIN,
-            (Self::Rock, Self::Rock) => OUTCOME_DRAW,
-            (Self::Paper, Self::Paper) => OUTCOME_DRAW,
-            (Self::Paper, Self::Scissors) => OUTCOME_LOSE,
-            (Self::Paper, Self::Rock) => OUTCOME_WIN,
-            (Self::Scissors, Self::Paper) => OUTCOME_WIN,
-            (Self::Scissors, Self::Scissors) => OUTCOME_DRAW,
-            (Self::Scissors, Self::Rock) => OUTCOME_LOSE,
+    pub fn from_outcome(&self, outcome: Outcome) -> Self {
+        match (self, outcome) {
+            (Self::Rock, Outcome::Win) => Self::Paper,
+            (Self::Rock, Outcome::Lose) => Self::Scissors,
+            (Self::Rock, Outcome::Draw) => Self::Rock,
+            (Self::Paper, Outcome::Win) => Self::Scissors,
+            (Self::Paper, Outcome::Lose) => Self::Rock,
+            (Self::Paper, Outcome::Draw) => Self::Paper,
+            (Self::Scissors, Outcome::Win) => Self::Rock,
+            (Self::Scissors, Outcome::Lose) => Self::Paper,
+            (Self::Scissors, Outcome::Draw) => Self::Scissors,
+        }
+    }
+
+    pub fn score(&self) -> u32 {
+        match self {
+            Self::Rock => 1,
+            Self::Paper => 2,
+            Self::Scissors => 3,
         }
     }
 }
 
-impl From<Shape> for u32 {
-    fn from(value: Shape) -> Self {
-        match value {
-            Shape::Rock => 1,
-            Shape::Paper => 2,
-            Shape::Scissors => 3,
-        }
-    }
-}
-
-impl TryFrom<&str> for Shape {
-    type Error = &'static str;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+impl From<&str> for Shape {
+    fn from(value: &str) -> Self {
         match value.trim() {
-            "A" | "X" => Ok(Self::Rock),
-            "B" | "Y" => Ok(Self::Paper),
-            "C" | "Z" => Ok(Self::Scissors),
+            "A" => Self::Rock,
+            "B" => Self::Paper,
+            "C" => Self::Scissors,
+            _ => todo!(),
+        }
+    }
+}
+
+enum Outcome {
+    Win,
+    Lose,
+    Draw,
+}
+
+impl Outcome {
+    pub fn score(&self) -> u32 {
+        match self {
+            Self::Win => 6,
+            Self::Lose => 0,
+            Self::Draw => 3,
+        }
+    }
+}
+
+impl From<&str> for Outcome {
+    fn from(value: &str) -> Self {
+        match value.trim() {
+            "X" => Self::Lose,
+            "Y" => Self::Draw,
+            "Z" => Self::Win,
             _ => todo!(),
         }
     }
@@ -62,10 +81,10 @@ fn main() {
         }
 
         let (first, last) = line.split_at(1);
+        let shape = Shape::from(first);
+        let outcome = Outcome::from(last);
 
-        let (opponent, yours) = (Shape::try_from(first).unwrap(), Shape::try_from(last).unwrap());
-        let score =  yours.outcome(opponent) + u32::from(yours);
-
+        let score = outcome.score() + shape.from_outcome(outcome).score();
         total += score;
     }
 
