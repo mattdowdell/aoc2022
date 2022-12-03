@@ -1,8 +1,8 @@
 //! Models to encapsulate the logic of the Rock/Paper/Scissor rules.
 
 /// The shape used by a player in the game.
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Shape {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Shape {
     Rock,
     Paper,
     Scissors,
@@ -63,7 +63,8 @@ impl TryFrom<&str> for Shape {
 }
 
 /// The outcome of a game.
-enum Outcome {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Outcome {
     Win,
     Lose,
     Draw,

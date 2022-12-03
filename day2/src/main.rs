@@ -4,15 +4,31 @@
 
 mod models;
 
-use std::io::{self, BufRead};
-use models::{Shape, Outcome}
+use models::{Outcome, Shape};
+use std::io::{self, BufRead, Lines};
+
+struct Answer {
+    part1: u32,
+    part2: u32,
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let stdin = io::stdin();
+    let answer = run(io::stdin().lock().lines())?;
+
+    println!("Solution 1: {}", answer.part1);
+    println!("Solution 2: {}", answer.part2);
+
+    Ok(())
+}
+
+fn run<T>(lines: Lines<T>) -> Result<Answer, Box<dyn std::error::Error>>
+where
+    T: BufRead,
+{
     let mut total1 = 0;
     let mut total2 = 0;
 
-    for line in stdin.lock().lines() {
+    for line in lines {
         let line = line?;
 
         if line.is_empty() {
@@ -28,8 +44,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         total2 += outcome.score() + shape1.match_outcome(outcome).score();
     }
 
-    println!("Solution 1: {}", total1);
-    println!("Solution 2: {}", total2);
+    Ok(Answer {
+        part1: total1,
+        part2: total2,
+    })
+}
 
-    Ok(())
+#[cfg(test)]
+mod test {
+    use super::run;
+    use std::io::BufRead;
+
+    macro_rules! lines {
+        ($file:literal) => {
+            std::fs::File::open(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($file))
+                .map(|f| std::io::BufReader::new(f).lines())
+        };
+    }
+
+    #[test]
+    fn test_sample() -> Result<(), Box<dyn std::error::Error>> {
+        let lines = lines!("sample.txt")?;
+        let answer = run(lines)?;
+
+        assert_eq!(answer.part1, 15);
+        assert_eq!(answer.part2, 12);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_user_specific() -> Result<(), Box<dyn std::error::Error>> {
+        let lines = lines!("input.txt")?;
+        let answer = run(lines)?;
+
+        assert_eq!(answer.part1, 15632);
+        assert_eq!(answer.part2, 14416);
+
+        Ok(())
+    }
 }

@@ -3,10 +3,26 @@
 //! [1]: https://adventofcode.com/2022/day/3
 
 use std::collections::HashSet;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Lines};
+
+struct Answer {
+    part1: u32,
+    part2: u32,
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut lines = io::stdin().lock().lines();
+    let answer = run(io::stdin().lock().lines())?;
+
+    println!("Solution 1: {}", answer.part1);
+    println!("Solution 2: {}", answer.part2);
+
+    Ok(())
+}
+
+fn run<T>(mut lines: Lines<T>) -> Result<Answer, Box<dyn std::error::Error>>
+where
+    T: BufRead,
+{
     let mut total1 = 0;
     let mut total2 = 0;
 
@@ -28,14 +44,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 badges = line.chars().collect();
             } else {
                 let filter: HashSet<char> = line.chars().collect();
-                badges.retain(|c| filter.contains(&c));
+                badges.retain(|c| filter.contains(c));
             }
 
             // find common chars in the 2 halves of the line
             let (first, second) = line.split_at(line.len() / 2);
 
             let chars: HashSet<char> = first.chars().collect();
-            let common = second.chars().find(|c| chars.contains(&c)).ok_or("no common char found")?;
+            let common = second
+                .chars()
+                .find(|c| chars.contains(c))
+                .ok_or("no common char found")?;
 
             total1 += char_to_priority(common)?;
         }
@@ -44,10 +63,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         badges.clear();
     }
 
-    println!("Solution 1: {}", total1);
-    println!("Solution 2: {}", total2);
-
-    Ok(())
+    Ok(Answer {
+        part1: total1,
+        part2: total2,
+    })
 }
 
 // Map an ASCII alphabetic char to a priority, where a-z are priorities 1-26, while A-Z are
@@ -57,5 +76,40 @@ fn char_to_priority(c: char) -> Result<u32, &'static str> {
         'A'..='Z' => Ok((c as u32) - 38),
         'a'..='z' => Ok((c as u32) - 96),
         _ => Err("failed to map char to priority"),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::run;
+    use std::io::BufRead;
+
+    macro_rules! lines {
+        ($file:literal) => {
+            std::fs::File::open(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($file))
+                .map(|f| std::io::BufReader::new(f).lines())
+        };
+    }
+
+    #[test]
+    fn test_sample() -> Result<(), Box<dyn std::error::Error>> {
+        let lines = lines!("sample.txt")?;
+        let answer = run(lines)?;
+
+        assert_eq!(answer.part1, 157);
+        assert_eq!(answer.part2, 70);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_user_specific() -> Result<(), Box<dyn std::error::Error>> {
+        let lines = lines!("input.txt")?;
+        let answer = run(lines)?;
+
+        assert_eq!(answer.part1, 7553);
+        assert_eq!(answer.part2, 2758);
+
+        Ok(())
     }
 }
