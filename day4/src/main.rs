@@ -2,6 +2,10 @@
 //!
 //! [1]: https://adventofcode.com/2022/day/4
 
+#![feature(test)]
+
+extern crate test;
+
 mod models;
 
 use models::Range;
@@ -56,14 +60,20 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::run;
     use std::io::BufRead;
+    use test::Bencher;
+
+    macro_rules! file {
+        ($file:literal) => {
+            std::fs::File::open(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($file))
+        };
+    }
 
     macro_rules! lines {
         ($file:literal) => {
-            std::fs::File::open(std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($file))
-                .map(|f| std::io::BufReader::new(f).lines())
+            file!($file).map(|f| std::io::BufReader::new(f).lines())
         };
     }
 
@@ -87,5 +97,21 @@ mod test {
         assert_eq!(answer.part2, 870);
 
         Ok(())
+    }
+
+    #[bench]
+    fn bench_sample(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("sample.txt").unwrap();
+            run(lines).unwrap();
+        })
+    }
+
+    #[bench]
+    fn bench_user_specific(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("input.txt").unwrap();
+            run(lines).unwrap();
+        })
     }
 }

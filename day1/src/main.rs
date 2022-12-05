@@ -2,6 +2,10 @@
 //!
 //! [1]: https://adventofcode.com/2022/day/1
 
+#![feature(test)]
+
+extern crate test;
+
 use std::cmp::Reverse;
 use std::io::{self, BufRead, Lines};
 
@@ -51,9 +55,10 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::run;
     use std::io::BufRead;
+    use test::Bencher;
 
     macro_rules! lines {
         ($file:literal) => {
@@ -82,5 +87,21 @@ mod test {
         assert_eq!(answer.part2, 199628);
 
         Ok(())
+    }
+
+    #[bench]
+    fn bench_sample(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("sample.txt").unwrap();
+            run(lines).unwrap();
+        })
+    }
+
+    #[bench]
+    fn bench_user_specific(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("input.txt").unwrap();
+            run(lines).unwrap();
+        })
     }
 }

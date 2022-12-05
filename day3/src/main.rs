@@ -2,6 +2,10 @@
 //!
 //! [1]: https://adventofcode.com/2022/day/3
 
+#![feature(test)]
+
+extern crate test;
+
 use std::collections::HashSet;
 use std::io::{self, BufRead, Lines};
 
@@ -80,9 +84,10 @@ fn char_to_priority(c: char) -> Result<u32, &'static str> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::run;
     use std::io::BufRead;
+    use test::Bencher;
 
     macro_rules! lines {
         ($file:literal) => {
@@ -111,5 +116,21 @@ mod test {
         assert_eq!(answer.part2, 2758);
 
         Ok(())
+    }
+
+    #[bench]
+    fn bench_sample(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("sample.txt").unwrap();
+            run(lines).unwrap();
+        })
+    }
+
+    #[bench]
+    fn bench_user_specific(b: &mut Bencher) {
+        b.iter(|| {
+            let lines = lines!("input.txt").unwrap();
+            run(lines).unwrap();
+        })
     }
 }
