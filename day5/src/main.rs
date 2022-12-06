@@ -1,6 +1,6 @@
-//! Solution for [Advent of Code 2022 - Day 4][1].
+//! Solution for [Advent of Code 2022 - Day 5][1].
 //!
-//! [1]: https://adventofcode.com/2022/day/4
+//! [1]: https://adventofcode.com/2022/day/5
 
 use lazy_static::lazy_static;
 use regex::Regex;
