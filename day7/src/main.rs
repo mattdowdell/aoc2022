@@ -4,6 +4,7 @@
 
 use std::collections::HashMap;
 use std::io::{self, BufRead, Lines};
+use std::path::PathBuf;
 
 struct Answer {
     part1: u64,
@@ -23,56 +24,34 @@ fn run<T>(mut lines: Lines<T>) -> Result<Answer, Box<dyn std::error::Error>>
 where
     T: BufRead,
 {
-    let fs = enter_dir(&mut lines)?;
-    let mut totals = Vec::new();
+    let mut dir_sizes = calc_dir_sizes(&mut lines)?;
+    dir_sizes.sort();
 
-    dir_size(&fs, &mut totals);
+    let part1 = dir_sizes.iter().filter(|&x| *x < 100_000).sum();
 
-    let mut part1 = 0;
+    let mut part2 = u64::MAX;
 
-    for total in totals.iter() {
-        if *total < 100000 {
-            part1 += *total;
+    let root_size = *dir_sizes.last().unwrap();
+    let to_free = 30_000_000 - (70_000_000 - root_size);
+
+    for size in dir_sizes {
+        if size < part2 && size > to_free {
+            part2 = size;
         }
     }
-
-    let size = *totals.last().unwrap();
-    let unused = 70000000 - size;
-    let to_free = 30000000 - unused;
-    let mut part2 = size;
-
-    for total in totals.iter() {
-        if *total < part2 && *total > to_free {
-            part2 = *total;
-        }
-    }
-
-    println!("size: {}", size);
-    println!("unused: {}", unused);
-    println!("to free: {}", to_free);
-    println!("to delete: {}", part2);
 
     Ok(Answer { part1, part2 })
 }
 
-#[derive(Debug)]
-enum Entry {
-    Dir(HashMap<String, Entry>),
-    File(u64),
-}
-
-fn enter_dir<T>(lines: &mut Lines<T>) -> Result<HashMap<String, Entry>, Box<dyn std::error::Error>>
+fn calc_dir_sizes<T>(lines: &mut Lines<T>) -> Result<Vec<u64>, Box<dyn std::error::Error>>
 where
     T: BufRead,
 {
-    let mut cwd: HashMap<String, Entry> = HashMap::new();
+    let mut fs: HashMap<PathBuf, Vec<u64>> = HashMap::new();
+    let mut path = PathBuf::new();
 
-    loop {
-        let line = read_line(lines)?;
-        if line.is_none() {
-            break;
-        }
-        let line = line.unwrap();
+    for line in lines {
+        let line = line?;
 
         if line.is_empty() {
             break;
@@ -83,15 +62,25 @@ where
         }
 
         if let Some(dir) = line.strip_prefix("$ cd ") {
-            if dir == "/" {
+            if dir == ".." {
+                // store the size of the child dir in the parent
+                let size = if let Some(sizes) = fs.get(&path) {
+                    sizes.iter().sum()
+                } else {
+                    0
+                };
+
+                path = path.parent().unwrap().to_path_buf();
+                fs.get_mut(&path).unwrap().push(size);
                 continue;
             }
 
-            if dir == ".." {
-                break;
+            path.push(dir);
+
+            if fs.get(&path).is_none() {
+                fs.insert(path.clone(), Vec::new());
             }
 
-            cwd.insert(dir.to_string(), Entry::Dir(enter_dir(lines)?));
             continue;
         }
 
@@ -99,36 +88,35 @@ where
             continue;
         }
 
-        let (size, name) = line.split_once(' ').unwrap();
-        cwd.insert(name.to_string(), Entry::File(size.parse()?));
+        let (size, _) = line.split_once(' ').unwrap();
+
+        if fs.get(&path).is_none() {
+            fs.insert(path.clone(), Vec::new());
+        }
+
+        fs.get_mut(&path).unwrap().push(size.parse()?);
     }
 
-    Ok(cwd)
-}
+    // replicate any missing `$ cd ..` to make sure the root dir has all child dir sizes
+    loop {
+        if let Some(parent) = path.parent() {
+            let size = if let Some(sizes) = fs.get(&path) {
+                sizes.iter().sum()
+            } else {
+                0
+            };
 
-fn read_line<T>(lines: &mut Lines<T>) -> Result<Option<String>, Box<dyn std::error::Error>>
-where
-    T: BufRead,
-{
-    if let Some(line) = lines.next() {
-        Ok(Some(line?))
-    } else {
-        Ok(None)
-    }
-}
+            println!("{}", parent.display());
+            path = parent.to_path_buf();
+            fs.get_mut(&path).unwrap().push(size);
+            continue;
+        }
 
-fn dir_size(dir: &HashMap<String, Entry>, totals: &mut Vec<u64>) -> u64 {
-    let mut total: u64 = 0;
-
-    for (_, entry) in dir.iter() {
-        total += match entry {
-            Entry::Dir(dir) => dir_size(dir, totals),
-            Entry::File(size) => *size,
-        };
+        break;
     }
 
-    totals.push(total);
-    total
+    // sum all the child dir sizes to make later calculations simpler
+    Ok(fs.values().map(|v| v.iter().sum()).collect())
 }
 
 #[cfg(test)]
