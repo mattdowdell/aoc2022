@@ -43,6 +43,7 @@ where
     Ok(Answer { part1, part2 })
 }
 
+// Calculate the sizes of the directories as given by the input.
 fn calc_dir_sizes<T>(lines: &mut Lines<T>) -> Result<Vec<u64>, Box<dyn std::error::Error>>
 where
     T: BufRead,
@@ -57,10 +58,12 @@ where
             break;
         }
 
+        // ignore ls commands, no useful info in them
         if line == "$ ls" {
             continue;
         }
 
+        // change directory to get some other sizes
         if let Some(dir) = line.strip_prefix("$ cd ") {
             if dir == ".." {
                 // store the size of the child dir in the parent
@@ -84,6 +87,7 @@ where
             continue;
         }
 
+        // ignore dir listings, no useful info in them
         if line.strip_prefix("dir ").is_some() {
             continue;
         }
