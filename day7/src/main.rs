@@ -29,16 +29,10 @@ where
 
     let part1 = dir_sizes.iter().filter(|&x| *x < 100_000).sum();
 
-    let mut part2 = u64::MAX;
-
     let root_size = *dir_sizes.last().unwrap();
     let to_free = 30_000_000 - (70_000_000 - root_size);
 
-    for size in dir_sizes {
-        if size < part2 && size > to_free {
-            part2 = size;
-        }
-    }
+    let part2 = *dir_sizes.iter().find(|&x| *x > to_free).unwrap();
 
     Ok(Answer { part1, part2 })
 }
@@ -80,6 +74,7 @@ where
 
             path.push(dir);
 
+            // make sure we have some to store file sizes in for this dir
             if fs.get(&path).is_none() {
                 fs.insert(path.clone(), Vec::new());
             }
@@ -88,31 +83,22 @@ where
         }
 
         // ignore dir listings, no useful info in them
-        if line.strip_prefix("dir ").is_some() {
+        if line.starts_with("dir ") {
             continue;
         }
 
         let (size, _) = line.split_once(' ').unwrap();
-
-        if fs.get(&path).is_none() {
-            fs.insert(path.clone(), Vec::new());
-        }
-
         fs.get_mut(&path).unwrap().push(size.parse()?);
     }
 
     // replicate any missing `$ cd ..` to make sure the root dir has all child dir sizes
     loop {
         if let Some(parent) = path.parent() {
-            let size = if let Some(sizes) = fs.get(&path) {
-                sizes.iter().sum()
-            } else {
-                0
-            };
+            let size = fs.get(&path).map(|x| x.iter().sum()).unwrap_or(0);
 
-            println!("{}", parent.display());
             path = parent.to_path_buf();
             fs.get_mut(&path).unwrap().push(size);
+
             continue;
         }
 
