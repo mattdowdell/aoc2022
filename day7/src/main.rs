@@ -29,10 +29,13 @@ where
 
     let part1 = dir_sizes.iter().filter(|&x| *x < 100_000).sum();
 
-    let root_size = *dir_sizes.last().unwrap();
+    let root_size = *dir_sizes.last().ok_or("no dir sizes present")?;
     let to_free = 30_000_000 - (70_000_000 - root_size);
 
-    let part2 = *dir_sizes.iter().find(|&x| *x > to_free).unwrap();
+    let part2 = *dir_sizes
+        .iter()
+        .find(|&x| *x > to_free)
+        .ok_or("no matching dir sizes found")?;
 
     Ok(Answer { part1, part2 })
 }
@@ -67,8 +70,10 @@ where
                     0
                 };
 
-                path = path.parent().unwrap().to_path_buf();
-                fs.get_mut(&path).unwrap().push(size);
+                path = path.parent().ok_or("missing parent path")?.to_path_buf();
+                fs.get_mut(&path)
+                    .ok_or("missing sizes for path")?
+                    .push(size);
                 continue;
             }
 
@@ -87,8 +92,10 @@ where
             continue;
         }
 
-        let (size, _) = line.split_once(' ').unwrap();
-        fs.get_mut(&path).unwrap().push(size.parse()?);
+        let (size, _) = line.split_once(' ').ok_or("failed to extract file size")?;
+        fs.get_mut(&path)
+            .ok_or("missing sizes for path")?
+            .push(size.parse()?);
     }
 
     // replicate any missing `$ cd ..` to make sure the root dir has all child dir sizes
@@ -97,7 +104,9 @@ where
             let size = fs.get(&path).map(|x| x.iter().sum()).unwrap_or(0);
 
             path = parent.to_path_buf();
-            fs.get_mut(&path).unwrap().push(size);
+            fs.get_mut(&path)
+                .ok_or("missing sizes for path")?
+                .push(size);
 
             continue;
         }
