@@ -89,13 +89,17 @@ impl Grid {
         let (mut tail_x, mut tail_y) = self.knots[index];
         let (head_x, head_y) = self.knots[index - 1];
 
+        // FIXME: need to be more optimal
         if (head_x - tail_x).abs() > 1 || (head_y - tail_y).abs() > 1 {
             tail_x += (head_x - tail_x).signum();
             tail_y += (head_y - tail_y).signum();
         }
 
         self.knots[index] = (tail_x, tail_y);
-        self.path.insert((tail_x, tail_y));
+
+        if self.knots.get(index + 1).is_none() {
+            self.path.insert((tail_x, tail_y));
+        }
     }
 
     ///
@@ -111,13 +115,15 @@ impl fmt::Display for Grid {
         let mut locations = self.path.iter().collect::<Vec<_>>();
         locations.sort();
 
-        let (min_x, min_y) = locations.first().unwrap();
-        let (max_x, max_y) = locations.last().unwrap();
+        let min_x = locations.iter().map(|(x, _)| x).min().unwrap();
+        let max_x = locations.iter().map(|(x, _)| x).max().unwrap();
+        let min_y = locations.iter().map(|(_, y)| y).min().unwrap();
+        let max_y = locations.iter().map(|(_, y)| y).max().unwrap();
 
         let mut data = String::new();
 
-        for y in (*min_y..*max_y + 2).rev() {
-            for x in *min_x..*max_x + 2 {
+        for y in (*min_y - 2..*max_y + 2).rev() {
+            for x in *min_x - 2..*max_x + 2 {
                 if self.path.contains(&(x, y)) {
                     data.push('#');
                 } else {
@@ -187,9 +193,9 @@ where
     println!("{}", grid2);
 
     let part1 = grid1.tail_locations();
-    // let part2 = grid2.tail_locations(); // TODO: fixme
+    let part2 = grid2.tail_locations();
 
-    Ok(Answer{part1, part2: 0})
+    Ok(Answer{part1, part2})
 }
 
 #[cfg(test)]
@@ -215,7 +221,6 @@ mod tests {
         let answer = run(lines)?;
 
         assert_eq!(answer.part1, 13);
-        // assert_eq!(answer.part2, 8);
 
         Ok(())
     }
@@ -224,10 +229,9 @@ mod tests {
     #[ignore]
     fn test_sample2() -> Result<(), Box<dyn std::error::Error>> {
         let lines = lines!("sample2.txt")?;
-        let _answer = run(lines)?;
+        let answer = run(lines)?;
 
-        // assert_eq!(answer.part1, 21);
-        // assert_eq!(answer.part2, 8);
+        assert_eq!(answer.part2, 9);
 
         Ok(())
     }
@@ -238,7 +242,7 @@ mod tests {
         let answer = run(lines)?;
 
         assert_eq!(answer.part1, 6271);
-        // assert_eq!(answer.part2, 199272);
+        // assert_eq!(answer.part2, 2743); // too high
 
         Ok(())
     }
