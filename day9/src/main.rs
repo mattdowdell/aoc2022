@@ -176,7 +176,7 @@ where
     T: BufRead,
 {
     let mut grid1 = Grid::new(2);
-    let mut grid2 = Grid::new(9);
+    let mut grid2 = Grid::new(10);
 
     for line in lines {
         let line = line?;
@@ -189,8 +189,6 @@ where
         grid1.apply(mov);
         grid2.apply(mov);
     }
-
-    println!("{}", grid2);
 
     let part1 = grid1.tail_locations();
     let part2 = grid2.tail_locations();
@@ -226,12 +224,11 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_sample2() -> Result<(), Box<dyn std::error::Error>> {
         let lines = lines!("sample2.txt")?;
         let answer = run(lines)?;
 
-        assert_eq!(answer.part2, 9);
+        assert_eq!(answer.part2, 36);
 
         Ok(())
     }
@@ -242,7 +239,7 @@ mod tests {
         let answer = run(lines)?;
 
         assert_eq!(answer.part1, 6271);
-        // assert_eq!(answer.part2, 2743); // too high
+        assert_eq!(answer.part2, 2458);
 
         Ok(())
     }
