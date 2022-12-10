@@ -1,4 +1,4 @@
-//! Models to model operations executed by a CPU.
+//! Models to represent operations executed by a CPU.
 
 use std::collections::VecDeque;
 use std::str::FromStr;

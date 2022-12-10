@@ -98,10 +98,7 @@ struct Move {
 
 impl Move {
     ///
-    pub fn apply(
-        &self,
-        data: &mut Vec<VecDeque<char>>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn apply(&self, data: &mut Vec<VecDeque<char>>) -> Result<(), Box<dyn std::error::Error>> {
         while data.len() < (self.to + 1) {
             data.push(VecDeque::new());
         }

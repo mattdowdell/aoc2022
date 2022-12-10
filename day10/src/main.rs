@@ -44,7 +44,7 @@ where
     let mut part2 = String::new();
 
     for (i, x) in cpu.execute().iter().enumerate() {
-        let sprite_over_cursor = (x - (i as i32 % 40)).abs() <= 1;
+        let sprite_over_cursor = (x - ((i as i32) % 40)).abs() <= 1;
         part2.push(if sprite_over_cursor { '#' } else { '.' });
 
         if (i as i32 + 1) % 40 == 0 {
@@ -120,5 +120,3 @@ mod tests {
         Ok(())
     }
 }
-
-// plefulb

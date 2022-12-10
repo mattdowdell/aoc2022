@@ -3,8 +3,8 @@
 //! [1]: https://adventofcode.com/2022/day/9
 
 use std::collections::HashSet;
-use std::io::{self, BufRead, Lines};
 use std::fmt;
+use std::io::{self, BufRead, Lines};
 
 struct Answer {
     part1: usize,
@@ -28,10 +28,7 @@ impl Grid {
             knots.push((0, 0));
         }
 
-        Self {
-            knots,
-            path,
-        }
+        Self { knots, path }
     }
 
     ///
@@ -47,7 +44,7 @@ impl Grid {
                         self.move_tail(i);
                     }
                 }
-            },
+            }
             Move::Left(count) => {
                 for _ in 0..count {
                     let (mut x, y) = self.knots[0];
@@ -58,7 +55,7 @@ impl Grid {
                         self.move_tail(i);
                     }
                 }
-            },
+            }
             Move::Up(count) => {
                 for _ in 0..count {
                     let (x, mut y) = self.knots[0];
@@ -69,7 +66,7 @@ impl Grid {
                         self.move_tail(i);
                     }
                 }
-            },
+            }
             Move::Down(count) => {
                 for _ in 0..count {
                     let (x, mut y) = self.knots[0];
@@ -80,7 +77,7 @@ impl Grid {
                         self.move_tail(i);
                     }
                 }
-            },
+            }
         }
     }
 
@@ -193,7 +190,7 @@ where
     let part1 = grid1.tail_locations();
     let part2 = grid2.tail_locations();
 
-    Ok(Answer{part1, part2})
+    Ok(Answer { part1, part2 })
 }
 
 #[cfg(test)]
