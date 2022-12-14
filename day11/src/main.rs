@@ -9,8 +9,8 @@ use std::io::{self, BufRead, Lines};
 use models::{parse_line, Monkey, MonkeyBuilder};
 
 struct Answer {
-    part1: u128,
-    part2: u128,
+    part1: u64,
+    part2: u64,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
