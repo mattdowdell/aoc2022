@@ -12,7 +12,7 @@ use models::Map;
 
 struct Answer {
     part1: i32,
-    part2: u32,
+    part2: i128,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,11 +28,18 @@ fn run<T>(lines: Lines<T>) -> Result<Answer, Box<dyn std::error::Error>>
 where
     T: BufRead,
 {
-    let target_row = 2_000_000;
-    // let target_row = 10;
 
     let map = Map::from(lines)?;
-    let part1 = map.covers(target_row);
+
+    let part1 = map.covers(2_000_000);
+    let mut part2 = 0;
+
+    for y in 0..=4_000_000 {
+        if let Some(x) = map.find_hole(y) {
+            part2 = x * 4_000_000 + y as i128;
+            break;
+        }
+    }
 
     // for (key, item) in grid.iter() {
     //     if item == &Item::Covered {
@@ -42,7 +49,7 @@ where
     // }
 
     // should get 26
-    Ok(Answer { part1, part2: 0 })
+    Ok(Answer { part1, part2 })
 }
 
 #[cfg(test)]

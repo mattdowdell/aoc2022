@@ -42,9 +42,21 @@ impl Map {
     ///
     pub fn covers(&self, target_row: i32) -> i32 {
         let ranges = self.ranges(target_row);
-        println!("{:?}", ranges);
+        // println!("{:?}", ranges);
 
         ranges.iter().fold(0, |acc, r| acc + r.len()) - self.items_on(target_row)
+    }
+
+    ///
+    pub fn find_hole(&self, target_row: i32) -> Option<i128> {
+        let ranges = self.ranges(target_row);
+        // println!("i={}, {:?}", target_row, ranges);
+
+        if ranges.len() == 1 {
+            None
+        } else {
+            Some(ranges[0].end as i128 + 1)
+        }
     }
 
     ///
@@ -79,7 +91,7 @@ impl Map {
 
         for sensor in self.sensors.iter() {
             if sensor.location.y == target_row {
-                println!("sensor {:?}", sensor.location);
+                // println!("sensor {:?}", sensor.location);
                 total += 1;
             }
 
@@ -88,7 +100,7 @@ impl Map {
 
         for beacon in beacons.iter() {
             if beacon.y == target_row {
-                println!("beacon {:?}", beacon);
+                // println!("beacon {:?}", beacon);
                 total += 1;
             }
         }
@@ -127,10 +139,10 @@ impl Sensor {
 
         if distance >= offset {
             let range = Range::from_mid_point(self.location.x, distance - offset);
-            println!(
-                "sensor in range {:?} ({}) {:?}",
-                self.location, distance, range
-            );
+            // println!(
+            //     "sensor in range {:?} ({}) {:?}",
+            //     self.location, distance, range
+            // );
             Some(range)
         } else {
             None
