@@ -40,17 +40,18 @@ impl Map {
     }
 
     ///
-    pub fn covers(&self, target_row: i32) -> i32 {
-        let ranges = self.ranges(target_row);
-        // println!("{:?}", ranges);
+    pub fn is_sample(&self) -> bool {
+        self.sensors.len() == 14
+    }
 
-        ranges.iter().fold(0, |acc, r| acc + r.len()) - self.items_on(target_row)
+    ///
+    pub fn covers(&self, target_row: i32) -> i32 {
+        self.ranges(target_row).iter().fold(0, |acc, r| acc + r.len()) - self.items_on(target_row)
     }
 
     ///
     pub fn find_hole(&self, target_row: i32) -> Option<i128> {
         let ranges = self.ranges(target_row);
-        // println!("i={}, {:?}", target_row, ranges);
 
         if ranges.len() == 1 {
             None
@@ -74,7 +75,7 @@ impl Map {
         ranges
             .into_iter()
             .coalesce(|a, b| {
-                if a.touches(&b) {
+                if a.overlaps(&b) {
                     Ok(a.merge(&b))
                 } else {
                     Err((a, b))
@@ -91,7 +92,6 @@ impl Map {
 
         for sensor in self.sensors.iter() {
             if sensor.location.y == target_row {
-                // println!("sensor {:?}", sensor.location);
                 total += 1;
             }
 
@@ -100,7 +100,6 @@ impl Map {
 
         for beacon in beacons.iter() {
             if beacon.y == target_row {
-                // println!("beacon {:?}", beacon);
                 total += 1;
             }
         }
@@ -138,12 +137,7 @@ impl Sensor {
         let offset = (self.location.y - target_row).abs();
 
         if distance >= offset {
-            let range = Range::from_mid_point(self.location.x, distance - offset);
-            // println!(
-            //     "sensor in range {:?} ({}) {:?}",
-            //     self.location, distance, range
-            // );
-            Some(range)
+            Some(Range::from_mid_point(self.location.x, distance - offset))
         } else {
             None
         }
@@ -230,13 +224,13 @@ impl Range {
     }
 
     ///
-    pub fn touches(&self, other: &Self) -> bool {
+    pub fn overlaps(&self, other: &Self) -> bool {
         self.start <= other.end && self.end >= other.start
     }
 
     ///
     pub fn merge(&self, other: &Self) -> Self {
-        if !self.touches(other) {
+        if !self.overlaps(other) {
             todo!();
         }
 

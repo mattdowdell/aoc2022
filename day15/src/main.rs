@@ -31,24 +31,19 @@ where
 
     let map = Map::from(lines)?;
 
-    let part1 = map.covers(2_000_000);
+    let part1_row = if map.is_sample() { 10 } else { 2_000_000 };
+    let part2_limit = if map.is_sample() { 20 } else { 4_000_000 };
+
+    let part1 = map.covers(part1_row);
     let mut part2 = 0;
 
-    for y in 0..=4_000_000 {
+    for y in 0..=part2_limit {
         if let Some(x) = map.find_hole(y) {
             part2 = x * 4_000_000 + y as i128;
             break;
         }
     }
 
-    // for (key, item) in grid.iter() {
-    //     if item == &Item::Covered {
-    //         // println!("{:?} is covered", key);
-    //         part1 += 1;
-    //     }
-    // }
-
-    // should get 26
     Ok(Answer { part1, part2 })
 }
 
@@ -70,25 +65,23 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_sample() -> Result<(), Box<dyn std::error::Error>> {
         let lines = lines!("sample.txt")?;
         let answer = run(lines)?;
 
-        assert_eq!(answer.part1, 0);
-        // assert_eq!(answer.part2, 0);
+        assert_eq!(answer.part1, 26);
+        assert_eq!(answer.part2, 56000011);
 
         Ok(())
     }
 
     #[test]
-    #[ignore]
     fn test_user_specific() -> Result<(), Box<dyn std::error::Error>> {
         let lines = lines!("input.txt")?;
         let answer = run(lines)?;
 
-        assert_eq!(answer.part1, 0);
-        // assert_eq!(answer.part2, 0);
+        assert_eq!(answer.part1, 4907780);
+        assert_eq!(answer.part2, 13639962836448);
 
         Ok(())
     }
