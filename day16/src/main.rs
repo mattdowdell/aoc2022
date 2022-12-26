@@ -6,11 +6,11 @@ mod models;
 
 use std::io::{self, BufRead, Lines};
 
-use models::Map;
+use models::Volcano;
 
 struct Answer {
-    part1: i32,
-    part2: i128,
+    part1: u32,
+    part2: u32,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,23 +26,17 @@ fn run<T>(lines: Lines<T>) -> Result<Answer, Box<dyn std::error::Error>>
 where
     T: BufRead,
 {
+    let mut volcano = Volcano::from(lines)?;
+    let mut pressure = 0;
 
-    let map = Map::from(lines)?;
-
-    let part1_row = if map.is_sample() { 10 } else { 2_000_000 };
-    let part2_limit = if map.is_sample() { 20 } else { 4_000_000 };
-
-    let part1 = map.covers(part1_row);
-    let mut part2 = 0;
-
-    for y in 0..=part2_limit {
-        if let Some(x) = map.find_hole(y) {
-            part2 = x * 4_000_000 + y as i128;
-            break;
-        }
+    for i in 1..=30 {
+        pressure += volcano.run(30 - i);
     }
 
-    Ok(Answer { part1, part2 })
+    Ok(Answer {
+        part1: pressure,
+        part2: 0,
+    })
 }
 
 #[cfg(test)]
@@ -67,19 +61,20 @@ mod tests {
         let lines = lines!("sample.txt")?;
         let answer = run(lines)?;
 
-        assert_eq!(answer.part1, 26);
-        assert_eq!(answer.part2, 56000011);
+        assert_eq!(answer.part1, 1651);
+        // assert_eq!(answer.part2, 0);
 
         Ok(())
     }
 
     #[test]
+    #[ignore]
     fn test_user_specific() -> Result<(), Box<dyn std::error::Error>> {
         let lines = lines!("input.txt")?;
         let answer = run(lines)?;
 
-        assert_eq!(answer.part1, 4907780);
-        assert_eq!(answer.part2, 13639962836448);
+        assert_eq!(answer.part1, 0);
+        // assert_eq!(answer.part2, 13639962836448);
 
         Ok(())
     }
